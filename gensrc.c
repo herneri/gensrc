@@ -17,6 +17,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 const char *extensions[] = {".c", ".cpp", ".java", ".html"};
@@ -56,9 +57,11 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	strcpy(source_name, "gensrc-templates/");
+	strcpy(source_name, getenv("HOME"));
+	strcat(source_name, ".gensrc-templates/");
 	strcat(source_name, "basic");
 	strcat(source_name, extension);
+
 	source_file = fopen(source_name, "r");
 	if (source_file == NULL) {
 		fprintf(stderr, "gensrc: Failed to find source file\n");
