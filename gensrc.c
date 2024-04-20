@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	while (fgets(buffer, 255, source_file) != NULL) {
-		fprintf(output_file, buffer);
+		fprintf(output_file, "%s", buffer);
 	}
 
 	fclose(source_file);
