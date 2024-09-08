@@ -18,9 +18,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 
 const char *extensions[] = {".c", ".cpp", ".java", ".html"};
+const char *GENSRC_DIR = "/.gensrc/";
+
 enum extension_num {
 	C, CPP, JAVA, HTML
 };
@@ -34,12 +37,23 @@ int main(int argc, char *argv[]) {
 	char *extension;
 	char buffer[255];
 
+	bool is_custom = false;
+
 	if (argc == 2 && strcmp(argv[1], "--help") || argc < 3) {
-		printf("usage: gensrc [option] [file_name]\n-c\tC Source\n-p\tC++ Source\n-j\tJava Source\n-h\tHTML Source\n");
+		printf("usage: gensrc [option] [file_name]\n-g\tCustom template\n-c\tC Source\n-p\tC++ Source\n-j\tJava Source\n-h\tHTML Source\n");
 		return 1;
 	}
 
 	switch (argv[1][1]) {
+	case 'g':
+		is_custom = true;
+
+		if (argc < 4) {
+			fprintf(stderr, "gensrc: Not enough arguments to create from a custom template \n");
+			return 1;
+		}
+
+		break;
 	case 'c':
 		extension = (char *) extensions[C];
 		break;
@@ -58,9 +72,14 @@ int main(int argc, char *argv[]) {
 	}
 
 	strcpy(source_name, getenv("HOME"));
-	strcat(source_name, ".gensrc-templates/");
-	strcat(source_name, "basic");
-	strcat(source_name, extension);
+	strcat(source_name, GENSRC_DIR);
+
+	if (is_custom == false) {
+		strcat(source_name, "basic");
+		strcat(source_name, extension);
+	} else {
+		strcat(source_name, argv[2]);
+	}
 
 	source_file = fopen(source_name, "r");
 	if (source_file == NULL) {
@@ -68,7 +87,11 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	file_name = strncat(argv[2], extension, 255);
+	if (is_custom == false)
+		file_name = strncat(argv[2], extension, 255);
+	else
+		file_name = argv[3];
+
 	output_file = fopen(file_name, "w");
 	if (output_file == NULL) {
 		fprintf(stderr, "gensrc: Unable to create file \n");
