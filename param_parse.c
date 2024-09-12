@@ -20,14 +20,18 @@
 
 #include "param_parse.h"
 
-struct param_queue *param_enqueue(struct param_queue *queue, struct param_node *node) {
+struct param_queue *param_enqueue(struct param_queue *queue, char *key, char *value) {
+	struct param_node *node = (struct param_node *) malloc(sizeof(struct param_node));
+	node->name = key;
+	node->value = value;
+
 	if (queue->head == NULL) {
 		queue->head = node;
 		return queue;
 	}
 
 	struct param_node *temp = queue->head;
-	while (temp != NULL)
+	while (temp->link != NULL)
 		temp = temp->link;
 
 	temp->link = node;
