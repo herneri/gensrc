@@ -41,4 +41,11 @@ struct param_queue {
 	struct param_node *head;
 };
 
+/*
+	Insertion and deletion for the queue
+	that will cache and count params.
+*/
+struct param_queue *param_enqueue(struct param_queue *queue, struct param_node *node);
+struct param_queue *param_dequeue(struct param_queue *queue);
+
 #endif /* PARAM_PARSE_H */
