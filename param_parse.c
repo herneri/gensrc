@@ -47,3 +47,11 @@ struct param_queue *param_dequeue(struct param_queue *queue) {
 	queue->count--;
 	return queue;
 }
+
+struct param_node *param_peek(struct param_queue *queue) {
+	if (queue == NULL) {
+		return NULL;
+	}
+
+	return queue->head;
+}

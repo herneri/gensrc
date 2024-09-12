@@ -48,4 +48,7 @@ struct param_queue {
 struct param_queue *param_enqueue(struct param_queue *queue, struct param_node *node);
 struct param_queue *param_dequeue(struct param_queue *queue);
 
+/* Retrieve the first node pointer in the queue */
+struct param_node *param_peek(struct param_queue *queue);
+
 #endif /* PARAM_PARSE_H */
