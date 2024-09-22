@@ -17,8 +17,18 @@
 */
 
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#include <stdio.h>
 
 #include "param_parse.h"
+
+/*
+    Max length of strings, including
+    buffers, keys, and values.
+*/
+const int MAX_LEN = 255;
 
 struct param_queue *param_enqueue(struct param_queue *queue, char *key, char *value) {
 	struct param_node *node = (struct param_node *) malloc(sizeof(struct param_node));
@@ -58,4 +68,45 @@ struct param_node *param_peek(struct param_queue *queue) {
 	}
 
 	return queue->head;
+}
+
+void param_parse(struct param_queue *queue, char *line) {
+	int length = strnlen(line, MAX_LEN);
+	int mode = SEEK_MODE;
+
+	char *key = (char *) malloc(MAX_LEN);
+	char *value = (char *) malloc(MAX_LEN);
+	int buffer_index = 0;
+
+	struct param_node *pNode = (struct param_node *) malloc(sizeof(struct param_node));
+
+	for (int i = 0; i < length; i++) {
+		char c = line[i];
+
+		if (isspace(c))
+			continue;
+
+		if (c == '=' && mode == KEY_MODE) {
+			mode = OPR_MODE;
+			pNode->name = key;
+			buffer_index = 0;
+			continue;
+		}
+
+		if (mode == SEEK_MODE) {
+			if (pNode->name == NULL) {
+				mode = KEY_MODE;
+			}
+		}
+
+		if (mode == KEY_MODE) {
+			key[buffer_index] = c;
+			buffer_index++;
+			continue;
+		}
+	}
+
+	free(key);
+	free(value);
+	return;
 }

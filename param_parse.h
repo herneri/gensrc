@@ -17,6 +17,19 @@
 #ifndef PARAM_PARSE_H
 #define PARAM_PARSE_H
 
+/*
+	Indicators of what mode is
+	currently active during parsing.
+
+	The modes consist of searching
+	for a key, value, or the assignment
+	operator.
+*/
+enum modes {
+	KEY_MODE, VALUE_MODE,
+	OPR_MODE, SEEK_MODE
+};
+
 /* 
 	A param node in a queue will
 	be a temporary storage for
@@ -50,5 +63,7 @@ struct param_queue *param_dequeue(struct param_queue *queue);
 
 /* Retrieve the first node pointer in the queue */
 struct param_node *param_peek(struct param_queue *queue);
+
+void param_parse(struct param_queue *queue, char *line);
 
 #endif /* PARAM_PARSE_H */
