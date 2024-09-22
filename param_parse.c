@@ -70,33 +70,45 @@ struct param_node *param_peek(struct param_queue *queue) {
 	return queue->head;
 }
 
-void param_parse(struct param_queue *queue, char *line) {
+struct param_queue *param_parse(struct param_queue *queue, char *line) {
 	int length = strnlen(line, MAX_LEN);
 	int mode = SEEK_MODE;
 
-	char *key = (char *) malloc(MAX_LEN);
-	char *value = (char *) malloc(MAX_LEN);
+	char *key = (char *) calloc(0, MAX_LEN);
+	char *value = (char *) calloc(0, MAX_LEN);
 	int buffer_index = 0;
-
-	struct param_node *pNode = (struct param_node *) malloc(sizeof(struct param_node));
 
 	for (int i = 0; i < length; i++) {
 		char c = line[i];
 
-		if (isspace(c))
+		if (isspace(c) && mode != VALUE_MODE) {
 			continue;
+		}
 
 		if (c == '=' && mode == KEY_MODE) {
 			mode = OPR_MODE;
-			pNode->name = key;
 			buffer_index = 0;
 			continue;
 		}
 
-		if (mode == SEEK_MODE) {
-			if (pNode->name == NULL) {
-				mode = KEY_MODE;
+		if (c == '"') {
+			if (mode == OPR_MODE && value[0] == 0) {
+				mode = VALUE_MODE;
+				continue;
+			} else if (mode == VALUE_MODE) {
+				mode = SEEK_MODE;
+				buffer_index = 0;
+
+				queue = param_enqueue(queue, key, value);
+
+				key = (char *) calloc(0, MAX_LEN);
+				value = (char *) calloc(0, MAX_LEN);
+				continue;
 			}
+		}
+
+		if (mode == SEEK_MODE && key[0] == 0) {
+			mode = KEY_MODE;
 		}
 
 		if (mode == KEY_MODE) {
@@ -104,9 +116,15 @@ void param_parse(struct param_queue *queue, char *line) {
 			buffer_index++;
 			continue;
 		}
+
+		if (mode == VALUE_MODE) {
+			value[buffer_index] = c;
+			buffer_index++;
+			continue;
+		}
 	}
 
 	free(key);
 	free(value);
-	return;
+	return queue;
 }
