@@ -37,6 +37,7 @@ struct param_queue *param_enqueue(struct param_queue *queue, char *key, char *va
 
 	if (queue->head == NULL) {
 		queue->head = node;
+		queue->count = 1;
 		return queue;
 	}
 
