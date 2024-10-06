@@ -75,8 +75,8 @@ struct param_queue *param_parse(struct param_queue *queue, char *line) {
 	int length = strnlen(line, MAX_LEN);
 	int mode = SEEK_MODE;
 
-	char *key = (char *) calloc(0, MAX_LEN);
-	char *value = (char *) calloc(0, MAX_LEN);
+	char *key = (char *) calloc(1, MAX_LEN);
+	char *value = (char *) calloc(1, MAX_LEN);
 	int buffer_index = 0;
 
 	for (int i = 0; i < length; i++) {
@@ -88,6 +88,7 @@ struct param_queue *param_parse(struct param_queue *queue, char *line) {
 
 		if (c == '=' && mode == KEY_MODE) {
 			mode = OPR_MODE;
+			key[buffer_index + 1] = '\0';
 			buffer_index = 0;
 			continue;
 		}
@@ -98,12 +99,13 @@ struct param_queue *param_parse(struct param_queue *queue, char *line) {
 				continue;
 			} else if (mode == VALUE_MODE) {
 				mode = SEEK_MODE;
+				value[buffer_index + 1] = '\0';
 				buffer_index = 0;
 
 				queue = param_enqueue(queue, key, value);
 
-				key = (char *) calloc(0, MAX_LEN);
-				value = (char *) calloc(0, MAX_LEN);
+				key = (char *) calloc(1, MAX_LEN);
+				value = (char *) calloc(1, MAX_LEN);
 				continue;
 			}
 		}
