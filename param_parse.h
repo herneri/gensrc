@@ -1,17 +1,15 @@
 /*
-    Copyright 2024 Eric Hernandez
+    Copyright 2024, 2025 Eric Hernandez
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
+	This file is part of gensrc.
 
-        https://www.apache.org/licenses/LICENSE-2.0
+	gensrc is free software: you can redistribute it and/or modify it under the terms of the GNU General
+	Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+	gensrc is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+	the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License along with gensrc. If not, see <https://www.gnu.org/licenses/>.
 */
 
 #ifndef PARAM_PARSE_H
@@ -41,29 +39,7 @@ struct param_node {
 	struct param_node *link;
 };
 
-/*
-	During initial parsing of a param file, 
-	params will be added to this queue and
-	a total count will be kept.
-
-	The queue will then be dequeued to a hash
-	table, which will be of size count.
-*/
-struct param_queue {
-	int count;
-	struct param_node *head;
-};
-
-/*
-	Insertion and deletion for the queue
-	that will cache and count params.
-*/
-struct param_queue *param_enqueue(struct param_queue *queue, char *key, char *value);
-struct param_queue *param_dequeue(struct param_queue *queue);
-
-/* Retrieve the first node pointer in the queue */
-struct param_node *param_peek(struct param_queue *queue);
-
-struct param_queue *param_parse(struct param_queue *queue, char *line);
+/* Parsing for param values with intermediary */
+struct param_node **param_parse(struct param_node **table, char *line);
 
 #endif /* PARAM_PARSE_H */

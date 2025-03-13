@@ -1,19 +1,17 @@
 /*
-	param_parse.c: Parsing algorithm and queue for param files
+	param_parse.c: Parsing algorithm and hash table for params
 
-    Copyright 2024 Eric Hernandez
+	Copyright 2024, 2025 Eric Hernandez
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
+	This file is part of gensrc.
 
-        https://www.apache.org/licenses/LICENSE-2.0
+	gensrc is free software: you can redistribute it and/or modify it under the terms of the GNU General
+	Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+	gensrc is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+	the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License along with gensrc. If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <stdlib.h>
@@ -23,6 +21,7 @@
 #include <stdio.h>
 
 #include "param_parse.h"
+#include "hash_table.h"
 
 /*
     Max length of strings, including
@@ -30,53 +29,28 @@
 */
 const int MAX_LEN = 255;
 
-struct param_queue *param_enqueue(struct param_queue *queue, char *key, char *value) {
+struct param_node **param_insert(struct param_node **table, char *key, char *value, int *length) {
 	struct param_node *node = (struct param_node *) malloc(sizeof(struct param_node));
+
 	node->name = key;
 	node->value = value;
 
-	if (queue->head == NULL) {
-		queue->head = node;
-		queue->count = 1;
-		return queue;
+	if (*length > 1) {
+		table = realloc(table, (*length)++);
 	}
 
-	struct param_node *temp = queue->head;
-	while (temp->link != NULL)
-		temp = temp->link;
-
-	temp->link = node;
-	queue->count++;
-	return queue;
+	unsigned int hash_code = hash(key, *length);
+	table[hash_code] = node;
+	return table;
 }
 
-struct param_queue *param_dequeue(struct param_queue *queue) {
-	if (queue->head == NULL) {
-		return NULL;
-	}
-
-	struct param_node *temp = queue->head; 
-	queue->head = temp->link;
-	free(temp);
-
-	queue->count--;
-	return queue;
-}
-
-struct param_node *param_peek(struct param_queue *queue) {
-	if (queue == NULL) {
-		return NULL;
-	}
-
-	return queue->head;
-}
-
-struct param_queue *param_parse(struct param_queue *queue, char *line) {
+struct param_node **param_parse(struct param_node **table, char *line) {
 	int length = strnlen(line, MAX_LEN);
 	int mode = SEEK_MODE;
+	int element_count = 0;
 
-	char *key = (char *) calloc(1, MAX_LEN);
-	char *value = (char *) calloc(1, MAX_LEN);
+	char *key = (char *) calloc(MAX_LEN, sizeof(char));
+	char *value = (char *) calloc(MAX_LEN, sizeof(char));
 	int buffer_index = 0;
 
 	for (int i = 0; i < length; i++) {
@@ -102,10 +76,11 @@ struct param_queue *param_parse(struct param_queue *queue, char *line) {
 				value[buffer_index + 1] = '\0';
 				buffer_index = 0;
 
-				queue = param_enqueue(queue, key, value);
+				element_count++;
+				table = param_insert(table, key, value, &element_count);
 
-				key = (char *) calloc(1, MAX_LEN);
-				value = (char *) calloc(1, MAX_LEN);
+				key = (char *) calloc(MAX_LEN, sizeof(char));
+				value = (char *) calloc(MAX_LEN, sizeof(char));
 				continue;
 			}
 		}
@@ -129,5 +104,5 @@ struct param_queue *param_parse(struct param_queue *queue, char *line) {
 
 	free(key);
 	free(value);
-	return queue;
+	return table;
 }
