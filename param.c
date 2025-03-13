@@ -20,14 +20,28 @@
 
 #include <stdio.h>
 
-#include "param_parse.h"
-#include "hash_table.h"
+#include "param.h"
 
 /*
     Max length of strings, including
     buffers, keys, and values.
 */
 const int MAX_LEN = 255;
+
+unsigned int hash(char *string, const int table_size) {
+    int length = strlen(string);
+    unsigned int hash = length * string[0];
+
+    for (int i = 0; i < length; i++) {
+        hash *= string[i];
+        hash = string[i] * string[0];
+    }
+
+    hash *= string[length / 2];
+    hash ^= string[length - 1];
+
+    return hash % table_size;
+}
 
 struct param_node **param_insert(struct param_node **table, char *key, char *value, int *length) {
 	struct param_node *node = (struct param_node *) malloc(sizeof(struct param_node));

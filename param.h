@@ -39,6 +39,9 @@ struct param_node {
 	struct param_node *link;
 };
 
+/* Hash function made to perform on strings in large hash tables */
+unsigned int hash(char *string, const int table_size);
+
 /* Parsing for param values with intermediary */
 struct param_node **param_parse(struct param_node **table, char *line);
 
