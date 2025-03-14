@@ -28,7 +28,7 @@
 */
 const int MAX_LEN = 255;
 
-unsigned int hash(char *string, const int table_size) {
+unsigned int gensrc_hash_key(char *string, const int table_size) {
     int length = strlen(string);
     unsigned int hash = length * string[0];
 
@@ -43,7 +43,7 @@ unsigned int hash(char *string, const int table_size) {
     return hash % table_size;
 }
 
-struct param_node **param_insert(struct param_node **table, char *key, char *value, int *length) {
+struct param_node **gensrc_param_insert(struct param_node **table, char *key, char *value, int *length) {
 	struct param_node *node = (struct param_node *) malloc(sizeof(struct param_node));
 
 	node->name = key;
@@ -53,12 +53,12 @@ struct param_node **param_insert(struct param_node **table, char *key, char *val
 		table = realloc(table, (*length)++);
 	}
 
-	unsigned int hash_code = hash(key, *length);
+	unsigned int hash_code = gensrc_hash_key(key, *length);
 	table[hash_code] = node;
 	return table;
 }
 
-struct param_node **param_parse(struct param_node **table, char *line) {
+struct param_node **gensrc_param_parse(struct param_node **table, char *line) {
 	int length = strnlen(line, MAX_LEN);
 	int mode = SEEK_MODE;
 	int element_count = 0;
@@ -91,7 +91,7 @@ struct param_node **param_parse(struct param_node **table, char *line) {
 				buffer_index = 0;
 
 				element_count++;
-				table = param_insert(table, key, value, &element_count);
+				table = gensrc_param_insert(table, key, value, &element_count);
 
 				key = (char *) calloc(MAX_LEN, sizeof(char));
 				value = (char *) calloc(MAX_LEN, sizeof(char));

@@ -40,9 +40,9 @@ struct param_node {
 };
 
 /* Hash function made to perform on strings in large hash tables */
-unsigned int hash(char *string, const int table_size);
+unsigned int gensrc_hash_key(char *string, const int table_size);
 
 /* Parsing for param values with intermediary */
-struct param_node **param_parse(struct param_node **table, char *line);
+struct param_node **gensrc_param_parse(struct param_node **table, char *line);
 
 #endif /* PARAM_PARSE_H */
