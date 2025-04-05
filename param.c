@@ -58,10 +58,47 @@ struct param_node **gensrc_param_insert(struct param_node **table, char *key, ch
 	return table;
 }
 
-struct param_node **gensrc_param_parse(struct param_node **table, char *line) {
+void gensrc_enqueue(struct param_queue **queue, const char *key, const char *value) {
+	struct param_node *node = (struct param_node *) malloc(sizeof(struct param_node));
+	node->name = (char *) key;
+	node->value = (char *) value;
+
+	if ((*queue)->head == NULL) {
+		(*queue)->head = node;
+		(*queue)->count = 1;
+		return;
+	}
+
+
+	struct param_node *temp = (*queue)->head;
+	while (temp->link != NULL) {
+		temp = temp->link;
+	}
+
+	temp->link = node;
+	(*queue)->count++;
+	return;
+}
+
+void gensrc_dequeue(struct param_queue **queue) {
+	if ((*queue)->head == NULL) {
+		return;
+	}
+
+	struct param_node *temp = (*queue)->head;
+	(*queue)->head = temp->link;
+
+	(*queue)->count--;
+	return;
+}
+
+struct param_node *gensrc_queue_peek(struct param_queue *queue) {
+	return queue->head;
+}
+
+void gensrc_param_parse(struct param_queue **queue, char *line) {
 	int length = strnlen(line, MAX_LEN);
 	int mode = SEEK_MODE;
-	int element_count = 0;
 
 	char *key = (char *) calloc(MAX_LEN, sizeof(char));
 	char *value = (char *) calloc(MAX_LEN, sizeof(char));
@@ -90,8 +127,7 @@ struct param_node **gensrc_param_parse(struct param_node **table, char *line) {
 				value[buffer_index + 1] = '\0';
 				buffer_index = 0;
 
-				element_count++;
-				table = gensrc_param_insert(table, key, value, &element_count);
+				gensrc_enqueue(queue, key, value);
 
 				key = (char *) calloc(MAX_LEN, sizeof(char));
 				value = (char *) calloc(MAX_LEN, sizeof(char));
@@ -118,5 +154,5 @@ struct param_node **gensrc_param_parse(struct param_node **table, char *line) {
 
 	free(key);
 	free(value);
-	return table;
+	return;
 }

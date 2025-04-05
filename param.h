@@ -39,10 +39,43 @@ struct param_node {
 	struct param_node *link;
 };
 
+/*
+	During initial parsing of a param file, params will be
+	added to this queue and a total count will be kept.
+
+	The queue will be dequeued to a hash table, which will
+	be of size count.
+
+	This is necessary because:
+	1. A static table size is
+	   needed for consistent hashing.
+	2. The table size must be known before
+	   declaring the array for the table.
+
+	It also avoids memory fragmentation when
+	reallocating memory for the table.
+*/
+struct param_queue {
+	int count;
+	struct param_node *head;
+};
+
 /* Hash function made to perform on strings in large hash tables */
 unsigned int gensrc_hash_key(char *string, const int table_size);
 
+/* Allocates and enqueues a param node. */
+void gensrc_enqueue(struct param_queue **queue, const char *key, const char *value);
+
+/*
+	Dequeues a param node without freeing it. Freeing of a node is
+	to be done after the hash table is done being used.
+*/
+void gensrc_dequeue(struct param_queue **queue);
+
+/* Retrieve the param node at the front of the queue. */
+struct param_node *gensrc_queue_peek(struct param_queue *queue);
+
 /* Parsing for param values with intermediary */
-struct param_node **gensrc_param_parse(struct param_node **table, char *line);
+void gensrc_param_parse(struct param_queue **queue, char *line);
 
 #endif /* PARAM_PARSE_H */
