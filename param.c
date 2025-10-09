@@ -152,3 +152,33 @@ void gensrc_param_parse(struct param_queue **queue, char *line) {
 	free(value);
 	return;
 }
+
+int gensrc_queue_transfer(struct param_node *table[], struct param_queue **queue) {
+	struct param_node *temp_node = NULL;
+	unsigned int hash_code = 0;
+	int param_count = (*queue)->count;
+
+	enum transfer_error_codes {
+		EMPTY_QUEUE
+	};
+
+	if ((*queue)->head == NULL) {
+		return EMPTY_QUEUE;
+	}
+
+	while ((*queue)->head != NULL) {
+		temp_node = gensrc_queue_peek(*queue);
+		hash_code = gensrc_hash_key(temp_node->name, param_count);
+
+		while (table[hash_code] != NULL) {
+			 hash_code = gensrc_handle_hash_collision(temp_node->name, hash_code, param_count);
+		}
+
+		table[hash_code] = temp_node;
+		gensrc_dequeue(queue);
+	}
+
+	free(*queue);
+	(*queue) = NULL;
+	return 0;
+}
