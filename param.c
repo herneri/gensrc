@@ -43,6 +43,17 @@ unsigned int gensrc_hash_key(char *string, const int table_size) {
     return hash % table_size;
 }
 
+unsigned int gensrc_handle_hash_collision(const char *key, const unsigned int hash_code, const int table_size) {
+	unsigned int new_hash = 1;
+	const int length = strlen(key);
+
+	for (int i = 0; i < length; i++) {
+		new_hash = key[i] * key[length];
+	}
+
+	return (new_hash + hash_code + 1) % table_size;
+}
+
 void gensrc_enqueue(struct param_queue **queue, const char *key, const char *value) {
 	struct param_node *node = (struct param_node *) malloc(sizeof(struct param_node));
 	node->name = (char *) key;

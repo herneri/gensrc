@@ -63,6 +63,9 @@ struct param_queue {
 /* Hash function made to perform on strings in large hash tables */
 unsigned int gensrc_hash_key(char *string, const int table_size);
 
+/* A hash function different to gensrc_hash_key() that's based on the previous hash code. */
+unsigned int gensrc_handle_hash_collision(const char *key, const unsigned int hash_code, const int table_size);
+
 /* Allocates and enqueues a param node. */
 void gensrc_enqueue(struct param_queue **queue, const char *key, const char *value);
 
