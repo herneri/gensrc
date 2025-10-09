@@ -1,4 +1,4 @@
-#include "param.h"
+#include "headers/param.h"
 
 #include <stdio.h>
 #include <string.h>

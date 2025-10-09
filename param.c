@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 
-#include "param.h"
+#include "headers/param.h"
 
 /*
     Max length of strings, including
