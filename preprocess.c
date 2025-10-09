@@ -50,7 +50,7 @@ bool gensrc_preprocess(struct param_node **table, const int table_size, const ch
 			end_param = false;
 		}
 
-		if (c != '*' && is_param == true && closing_param == false) {
+		if (c != '*' && is_param == true && closing_param == false && isspace(c) == false) {
 			param_name[param_name_index] = c;
 			param_name_index++;
 		}
