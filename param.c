@@ -43,21 +43,6 @@ unsigned int gensrc_hash_key(char *string, const int table_size) {
     return hash % table_size;
 }
 
-struct param_node **gensrc_param_insert(struct param_node **table, char *key, char *value, int *length) {
-	struct param_node *node = (struct param_node *) malloc(sizeof(struct param_node));
-
-	node->name = key;
-	node->value = value;
-
-	if (*length > 1) {
-		table = realloc(table, (*length)++);
-	}
-
-	unsigned int hash_code = gensrc_hash_key(key, *length);
-	table[hash_code] = node;
-	return table;
-}
-
 void gensrc_enqueue(struct param_queue **queue, const char *key, const char *value) {
 	struct param_node *node = (struct param_node *) malloc(sizeof(struct param_node));
 	node->name = (char *) key;
