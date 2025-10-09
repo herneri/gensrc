@@ -1,6 +1,7 @@
 #include "param.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <ctype.h>
@@ -35,6 +36,10 @@ bool gensrc_preprocess(struct param_node **table, const int table_size, const ch
 	while ((c = fgetc(template_file)) != EOF) {
 		if (end_param == true) {
 			unsigned int hash = gensrc_hash_key(param_name, table_size);
+
+			while (strcmp(table[hash]->name, param_name) != 0) {
+				hash = gensrc_handle_hash_collision(param_name, hash, table_size);
+			}
 
 			fprintf(processed_file, "%s", table[hash]->value);
 
