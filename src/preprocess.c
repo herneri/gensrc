@@ -91,5 +91,8 @@ bool gensrc_preprocess(struct param_node **table, const int table_size, const ch
 		}
 	}
 
+	free(param_name);
+	fclose(template_file);
+	fclose(processed_file);
 	return true;
 }
