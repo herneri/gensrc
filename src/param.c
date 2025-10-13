@@ -182,3 +182,15 @@ int gensrc_queue_transfer(struct param_node *table[], struct param_queue **queue
 	(*queue) = NULL;
 	return 0;
 }
+
+void gensrc_param_table_free(struct param_node *table[], int table_size) {
+	for (int i = 0; i < table_size; i++) {
+		free(table[i]->name);
+		free(table[i]->value);
+		free(table[i]);
+
+		table[i] = NULL;
+	}
+
+	return;
+}

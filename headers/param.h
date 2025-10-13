@@ -84,4 +84,10 @@ void gensrc_param_parse(struct param_queue **queue, char *line);
 /* Assign the nodes from the param queue to the hash table for preprocessing. */
 int gensrc_queue_transfer(struct param_node *table[], struct param_queue **queue);
 
+/*
+	Free all heap memory from a param hash table. This includes the param keys,
+	values, and structs themselves.
+*/
+void gensrc_param_table_free(struct param_node *table[], int table_size);
+
 #endif /* PARAM_PARSE_H */
