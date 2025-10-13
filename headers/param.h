@@ -81,6 +81,12 @@ struct param_node *gensrc_queue_peek(struct param_queue *queue);
 /* Parsing for param values with intermediary */
 void gensrc_param_parse(struct param_queue **queue, char *line);
 
+/*
+	Set each table element to NULL. This must be ran prior to the
+	param table being used.
+*/
+void gensrc_table_initialization(struct param_node *table[], int table_size);
+
 /* Assign the nodes from the param queue to the hash table for preprocessing. */
 int gensrc_queue_transfer(struct param_node *table[], struct param_queue **queue);
 

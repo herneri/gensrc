@@ -153,6 +153,14 @@ void gensrc_param_parse(struct param_queue **queue, char *line) {
 	return;
 }
 
+void gensrc_table_initialization(struct param_node *table[], int table_size) {
+	for (int i = 0; i < table_size; i++) {
+		table[i] = NULL;
+	}
+
+	return;
+}
+
 int gensrc_queue_transfer(struct param_node *table[], struct param_queue **queue) {
 	struct param_node *temp_node = NULL;
 	unsigned int hash_code = 0;
