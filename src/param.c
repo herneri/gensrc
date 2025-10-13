@@ -58,6 +58,7 @@ void gensrc_enqueue(struct param_queue **queue, const char *key, const char *val
 	struct param_node *node = (struct param_node *) malloc(sizeof(struct param_node));
 	node->name = (char *) key;
 	node->value = (char *) value;
+	node->link = NULL;
 
 	if ((*queue)->head == NULL) {
 		(*queue)->head = node;
