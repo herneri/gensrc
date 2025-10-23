@@ -12,93 +12,99 @@
 	You should have received a copy of the GNU General Public License along with gensrc. If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include "../headers/param.h"
+#include "../headers/preprocess.h"
+
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <stdbool.h>
 #include <string.h>
 
-const char *extensions[] = {".c", ".cpp", ".java", ".html"};
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+
 const char *GENSRC_DIR = "/.gensrc/";
 
-enum extension_num {
-	C, CPP, JAVA, HTML
+enum gensrc_return_codes {
+	GENOK, ARGERR, FSFAIL
 };
 
 int main(int argc, char *argv[]) {
-	FILE *source_file;
-	FILE *output_file;
+	const int MAX_LEN = 125;
 
-	char source_name[255];
-	char *file_name;
-	char *extension;
-	char buffer[255];
+	const char *HELP_MESSAGE = "usage: gensrc [OPTION] [OPERANDS]\n\
+-g [TEMPLATE_NAME]\tSpecify the name of the template to preprocess\n\
+-o [OUTPUT_FILE]\tName the output file, default is genout\n\
+-p [PARAM_FILE]\tThe param file to set values from, otherwise stdin is used\n";
 
-	bool is_custom = false;
+	char output_file_name[MAX_LEN];
+	strncpy(output_file_name, "genout", MAX_LEN);
 
-	if (argc == 2 && strcmp(argv[1], "--help") || argc < 3) {
-		printf("usage: gensrc [option] [file_name]\n-g\tCustom template\n-c\tC Source\n-p\tC++ Source\n-j\tJava Source\n-h\tHTML Source\n");
-		return 1;
+	char template_name[MAX_LEN];
+	template_name[0] = '\0';
+
+	struct param_queue *param_key_values = malloc(sizeof(struct param_queue));
+	param_key_values->head = NULL;
+	struct stat param_file_metadata;
+
+	char *param_file_data = NULL;
+	char param_file[MAX_LEN];
+	strncpy(param_file, "stdin", MAX_LEN);
+
+	int param_file_descriptor;
+	int param_table_size = 0;
+
+	bool seeking_operand = false;
+	bool read_stdin = true;
+
+	if (argc == 2 && (strcmp(argv[1], "--help") || strcmp(argv[1], "-h")) || argc < 3) {
+		fprintf(stderr, "%s\n", HELP_MESSAGE);
+		return GENOK;
 	}
 
-	switch (argv[1][1]) {
-	case 'g':
-		is_custom = true;
+	for (int i = 1; i < argc; i++) {
+		if (argv[i][0] == '-' && seeking_operand == false) {
+			if (i + 1 >= argc) {
+				fprintf(stderr, "gensrc: An option must have an operand after it \n");
+				return ARGERR;
+			}
 
-		if (argc < 4) {
-			fprintf(stderr, "gensrc: Not enough arguments to create from a custom template \n");
-			return 1;
+			seeking_operand = true;
+		} else if (argv[i][0] == '-' && seeking_operand == true) {
+			fprintf(stderr, "gensrc: An operand must come after an option \n");
+			return ARGERR;
 		}
 
-		break;
-	case 'c':
-		extension = (char *) extensions[C];
-		break;
-	case 'p':
-		extension = (char *) extensions[CPP];
-		break;
-	case 'j':
-		extension = (char *) extensions[JAVA];
-		break;
-	case 'h':
-		extension = (char *) extensions[HTML];
-		break;
-	default:
-		fprintf(stderr, "gensrc: Invalid source file type \n");
-		return 1;
+		switch (argv[i][1]) {
+		case 'p':
+			strncpy(param_file, argv[i + 1], MAX_LEN);
+			read_stdin = false;
+			i += 1;
+			break;
+		case 'o':
+			strncpy(output_file_name, argv[i + 1], MAX_LEN);
+			i += 1;
+			break;
+		case 'g':
+			strncpy(template_name, argv[i + 1], MAX_LEN);
+			i += 1;
+			break;
+		default:
+			fprintf(stderr, "gensrc: Invalid option: %s \n", argv[i]);
+			fprintf(stderr, "Use -h or --help for proper options \n");
+			return ARGERR;
+		}
+
+		seeking_operand = false;
 	}
 
-	strcpy(source_name, getenv("HOME"));
-	strcat(source_name, GENSRC_DIR);
-
-	if (is_custom == false) {
-		strcat(source_name, "basic");
-		strcat(source_name, extension);
-	} else {
-		strcat(source_name, argv[2]);
+	if (strnlen(template_name, MAX_LEN) == 0) {
+		fprintf(stderr, "gensrc: A template name is required, use -g to set it \n");
+		return ARGERR;
 	}
 
-	source_file = fopen(source_name, "r");
-	if (source_file == NULL) {
-		fprintf(stderr, "gensrc: Failed to find source file\n");
-		return 1;
-	}
-
-	if (is_custom == false)
-		file_name = strncat(argv[2], extension, 255);
-	else
-		file_name = argv[3];
-
-	output_file = fopen(file_name, "w");
-	if (output_file == NULL) {
-		fprintf(stderr, "gensrc: Unable to create file \n");
-		return 1;
-	}
-
-	while (fgets(buffer, 255, source_file) != NULL) {
-		fprintf(output_file, "%s", buffer);
-	}
-
-	fclose(source_file);
-	fclose(output_file);
-	return 0;
+	return GENOK;
 }
