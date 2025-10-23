@@ -106,5 +106,34 @@ int main(int argc, char *argv[]) {
 		return ARGERR;
 	}
 
+	if (read_stdin == false) {
+		param_file_descriptor = open(param_file, O_RDONLY, 0444);
+		stat(param_file, &param_file_metadata);
+
+		if (param_file_descriptor == -1) {
+			fprintf(stderr, "gensrc: Failed to read param file \n");
+			return FSFAIL;
+		}
+
+		param_file_data = mmap(NULL, param_file_metadata.st_size, PROT_READ, MAP_SHARED, param_file_descriptor, 0);
+	} else {
+		return 1; // TODO: Delete this and get params from stdin
+	}
+
+	gensrc_param_parse(&param_key_values, param_file_data, param_file_metadata.st_size);
+	param_table_size = param_key_values->count;
+
+	struct param_node *param_table[param_table_size];
+	gensrc_table_initialization(param_table, param_table_size);
+	gensrc_queue_transfer(param_table, &param_key_values);
+
+	gensrc_preprocess(param_table, param_table_size, template_name, output_file_name);
+
+	if (read_stdin == false) {
+		munmap(param_file_data, param_file_metadata.st_size);
+		close(param_file_descriptor);
+	}
+
+	gensrc_param_table_free(param_table, param_table_size);
 	return GENOK;
 }
