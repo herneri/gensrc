@@ -79,7 +79,7 @@ void gensrc_dequeue(struct param_queue **queue);
 struct param_node *gensrc_queue_peek(struct param_queue *queue);
 
 /* Parsing for param values with intermediary */
-void gensrc_param_parse(struct param_queue **queue, char *line);
+void gensrc_param_parse(struct param_queue **queue, char *line, const unsigned int line_length);
 
 /*
 	Set each table element to NULL. This must be ran prior to the

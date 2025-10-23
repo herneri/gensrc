@@ -93,15 +93,14 @@ struct param_node *gensrc_queue_peek(struct param_queue *queue) {
 	return queue->head;
 }
 
-void gensrc_param_parse(struct param_queue **queue, char *line) {
-	int length = strnlen(line, MAX_LEN);
+void gensrc_param_parse(struct param_queue **queue, char *line, const unsigned int line_length) {
 	int mode = SEEK_MODE;
 
 	char *key = (char *) calloc(MAX_LEN, sizeof(char));
 	char *value = (char *) calloc(MAX_LEN, sizeof(char));
 	int buffer_index = 0;
 
-	for (int i = 0; i < length; i++) {
+	for (int i = 0; i <= line_length; i++) {
 		char c = line[i];
 
 		if (isspace(c) && mode != VALUE_MODE) {
