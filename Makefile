@@ -1,5 +1,8 @@
 CC = gcc
-SRC = src/main.c src/preprocess.c src/param.c
+SRC = src/*.c
 
 default: $(SRC)
 	$(CC) $^ -o gensrc
+
+debug: $(SRC)
+	$(CC) $^ -g -o gendebug
