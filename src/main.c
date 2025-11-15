@@ -14,6 +14,7 @@
 
 #include "../headers/param.h"
 #include "../headers/preprocess.h"
+#include "../headers/util.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +30,7 @@
 const char *GENSRC_DIR = "/.gensrc/";
 
 enum gensrc_return_codes {
-	GENOK, ARGERR, FSFAIL
+	GENOK, ARGERR, FSFAIL, NOMEM
 };
 
 int main(int argc, char *argv[]) {
@@ -53,6 +54,8 @@ int main(int argc, char *argv[]) {
 	char *param_file_data = NULL;
 	char param_file[MAX_LEN];
 	strncpy(param_file, "stdin", MAX_LEN);
+
+	int param_data_size = 0;
 
 	int param_file_descriptor;
 	int param_table_size = 0;
@@ -115,12 +118,36 @@ int main(int argc, char *argv[]) {
 			return FSFAIL;
 		}
 
-		param_file_data = mmap(NULL, param_file_metadata.st_size, PROT_READ, MAP_SHARED, param_file_descriptor, 0);
+		param_data_size = param_file_metadata.st_size;
+		param_file_data = mmap(NULL, param_data_size, PROT_READ, MAP_SHARED, param_file_descriptor, 0);
 	} else {
-		return 1; // TODO: Delete this and get params from stdin
+		char user_choice = 'n';
+
+		do {
+			switch (gensrc_read_stdin(&param_file_data)) {
+			case STDIN_ALLOC_FAIL:
+				fprintf(stderr, "gensrc: Not enough memory to read user input \n");
+				return NOMEM;
+			case STDIN_REALLOC_FAIL:
+				/* TODO: Allow user to continue trying
+				fprintf(stderr, "gensrc: Not enough continuous memory to reallocate the input buffer. \n"
+				"Your input is saved, do you want to try again? (y/[n]) "
+				);
+
+				if (user_choice == 'n' || user_choice == 'N') {
+					return GENOK;
+				}
+				*/
+
+				return NOMEM;
+			}
+		} while (user_choice == 'y' || user_choice == 'Y');
+
+		/* param_file_data is NULL terminated by gensrc_read_stdin. */
+		param_data_size = strlen(param_file_data);
 	}
 
-	gensrc_param_parse(&param_key_values, param_file_data, param_file_metadata.st_size);
+	gensrc_param_parse(&param_key_values, param_file_data, param_data_size);
 	param_table_size = param_key_values->count;
 
 	struct param_node *param_table[param_table_size];
